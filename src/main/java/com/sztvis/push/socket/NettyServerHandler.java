@@ -61,12 +61,12 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             IdleStateEvent event = (IdleStateEvent) obj;
             //如果读通道处于空闲状态，说明没有收到心跳命令
             if (IdleState.READER_IDLE.equals(event.state())) {
-                log.info("已经60秒没有接收到客户端的信息了");
-                if (idle_count.get() > 1) {
-                    log.info("关掉不活跃的通道" + this.getEquipId());
-                    ctx.channel().close();
-                    mListener.onRemoveChannel(this);
-                }
+                log.info("已经60秒没有接收到客户端[" + this.getEquipId() + "]的信息了");
+                //if (idle_count.get() > 1) {
+                log.info("关掉不活跃的通道[" + this.getEquipId() + "]");
+                ctx.channel().close();
+                //mListener.onRemoveChannel(this);
+
                 idle_count.getAndIncrement();
             }
         } else {
@@ -82,12 +82,12 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        log.info("接收到客户端数据:" + msg);
+        //0log.info("接收到客户端数据:" + msg);
 //        ByteBuf buf = (ByteBuf) msg;
 //        byte[] data = new byte[buf.readableBytes()];
 //        buf.readBytes(data);
         String request = (String) msg;//new String(data, "utf-8");
-        log.info("request:" + request);
+        //log.info("request:" + request);
         dealData(ctx, request);
     }
 
@@ -95,6 +95,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
+        log.info("exceptionCaught");
         if (ctx.channel().isActive()) {
             mListener.onRemoveChannel(this);
             ctx.close();
