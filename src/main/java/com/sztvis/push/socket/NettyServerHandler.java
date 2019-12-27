@@ -61,10 +61,11 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             IdleStateEvent event = (IdleStateEvent) obj;
             //如果读通道处于空闲状态，说明没有收到心跳命令
             if (IdleState.READER_IDLE.equals(event.state())) {
-                log.info("已经5秒没有接收到客户端的信息了");
+                log.info("已经60秒没有接收到客户端的信息了");
                 if (idle_count.get() > 1) {
-                    log.info("关掉不活跃的channel");
+                    log.info("关掉不活跃的通道" + this.getEquipId());
                     ctx.channel().close();
+                    mListener.onRemoveChannel(this);
                 }
                 idle_count.getAndIncrement();
             }
