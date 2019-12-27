@@ -13,6 +13,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class EchoServer implements onChannelOperation {
@@ -44,6 +46,7 @@ public class EchoServer implements onChannelOperation {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ByteBuf byteBuf = Unpooled.copiedBuffer("$".getBytes());
+                            socketChannel.pipeline().addLast(new IdleStateHandler(60,0,0, TimeUnit.SECONDS));
                             socketChannel.pipeline().addLast(new DelimiterBasedFrameDecoder(1024, byteBuf));
                             socketChannel.pipeline().addLast(new StringDecoder(Charset.forName("UTF-8")));
                             socketChannel.pipeline().addLast(new StringEncoder(Charset.forName("UTF-8")));
@@ -84,7 +87,7 @@ public class EchoServer implements onChannelOperation {
     @Override
     public void onRemoveChannel(NettyServerHandler obj) {
         channelMap.remove(obj);
-        System.out.println("移除链接！！！:"+obj.getEquipId());
+        System.out.println("移除客户端["+obj.getEquipId()+"]:"+obj.getChannelHandler().channel());
     }
 
     @Override
